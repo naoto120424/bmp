@@ -55,7 +55,6 @@ class DCT:
 
 def df(data, alpha, beta, bS=4):
     l, h, _ = data.shape
-    data_copy = data.copy()
     for i in range(bS - 1, l - (bS - 1), 2):
         for j in range(h):
             p3 = data[j, i - 3]
@@ -84,20 +83,21 @@ def df(data, alpha, beta, bS=4):
                 q0t = (2 * q1 + q0 + p1 + 2) / 4
                 q1t, q2t = q1, q2
 
-            data_copy[j, i - 2] = p2t
-            data_copy[j, i - 1] = p1t
-            data_copy[j, i] = p0t
-            data_copy[j, i + 1] = q0t
-            data_copy[j, i + 2] = q1t
-            data_copy[j, i + 3] = q2t
+            data[j, i - 2] = p2t
+            data[j, i - 1] = p1t
+            data[j, i] = p0t
+            data[j, i + 1] = q0t
+            data[j, i + 2] = q1t
+            data[j, i + 3] = q2t
 
-    return data_copy
+    return data
 
 
 def mse(original, converted):
     l, h, c = original.shape
-    original, converted = original / 256, converted / 256
-    return np.sum(np.square(original.reshape(l * h * c) - converted.reshape(l * h * c)))
+    return np.sum(
+        np.square(original.reshape(l * h * c) - converted.reshape(l * h * c))
+    ) / (l * h * c)
 
 
 if __name__ == "__main__":
