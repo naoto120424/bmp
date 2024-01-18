@@ -134,21 +134,23 @@ if __name__ == "__main__":
                 )
 
     # パラメータα, βによるDe-blocking Filter
-    alpha = 100
-    beta = 100
+    alpha = 20
+    beta = 20
     im_df = df(im_y, alpha=alpha, beta=beta)
 
     im_mse = mse(im, im_df.astype(int))
     print(f"MSE: {im_mse}")
 
     # 元の画像と復元したものを表示
-    plt.subplot(1, 2, 1)
-    plt.imshow(im)
-    plt.title("original")
-    plt.xticks([])
+    fig = plt.figure(figsize=(8, 4))
+    axes = fig.subplots(1, 2)
 
-    plt.subplot(1, 2, 2)
-    plt.imshow(im_df.astype(int))
-    plt.title(f"restored, q={q}, alpha={alpha}, beta={beta}, mse={im_mse:.2f}")
-    plt.xticks([])
+    axes[0].imshow(im)
+    axes[1].imshow(im_df.astype(int))
+
+    axes[0].set_title("original")
+    axes[1].set_title("restored")
+
+    plt.suptitle(f"q={q}, alpha={alpha}, beta={beta}, mse={im_mse:.2f}")
+    plt.tight_layout()
     plt.show()
