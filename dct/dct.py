@@ -108,9 +108,6 @@ if __name__ == "__main__":
     im_c = np.zeros(im.shape)
     im_y = np.zeros(im.shape)
 
-    # パラメータQによる量子化 q = {5, 10, 20, 40}
-    q = 5
-
     # 8x8のパッチごとにdct変換を実行
     for i in range(im_c.shape[0] // N):
         for j in range(im_c.shape[1] // N):
@@ -118,6 +115,9 @@ if __name__ == "__main__":
                 im_c[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.dct2(
                     im[N * i : N * (i + 1), N * j : N * (j + 1), k]
                 )
+
+    # パラメータQによる量子化 q = {5, 10, 20, 40}
+    q = 5
 
     # 8x8のパッチごとにdct逆変換を実行
     for i in range(im_c.shape[0] // N):
