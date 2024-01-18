@@ -1,13 +1,6 @@
-# coding: utf-8
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-
-"""
-参考:
-[1]『画像処理とパターン認識入門』酒井幸市 著
-[2] scipy.fftpack.dct http://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.fftpack.dct.html
-"""
 
 
 class DCT:
@@ -108,7 +101,7 @@ def mse(original, converted):
 
 
 if __name__ == "__main__":
-    N = 8  # データの次元は10x10とする
+    N = 8
     dct = DCT(N)  # 離散コサイン変換を行うクラスを作成
 
     im = np.array(Image.open("lena.bmp"))
