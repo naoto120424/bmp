@@ -119,6 +119,7 @@ if __name__ == "__main__":
                     im[N * i : N * (i + 1), N * j : N * (j + 1), k]
                 )
 
+    # 8x8のパッチごとにdct逆変換を実行
     for i in range(im_c.shape[0] // N):
         for j in range(im_c.shape[1] // N):
             for k in range(im.shape[2]):
@@ -129,9 +130,10 @@ if __name__ == "__main__":
     # パラメータα, βによるDe-blocking Filter
     alpha = 20
     beta = 20
-    im_df = df(im_y, alpha=alpha, beta=beta)
+    im_y = df(im_y, alpha=alpha, beta=beta)
 
-    im_mse = mse(im, im_df.astype(int))
+    # 元画像と変換画像間のMSEを計算する
+    im_mse = mse(im, im_y.astype(int))
     print(f"MSE: {im_mse}")
 
     # 元の画像と復元したものを表示
@@ -139,7 +141,7 @@ if __name__ == "__main__":
     axes = fig.subplots(1, 2)
 
     axes[0].imshow(im)
-    axes[1].imshow(im_df.astype(int))
+    axes[1].imshow(im_y.astype(int))
 
     axes[0].set_title("original")
     axes[1].set_title("restored")
