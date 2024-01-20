@@ -27,18 +27,11 @@ class DCT:
 
     def dct2(self, data):
         """2次元離散コサイン変換を行う"""
-        return np.sum(
-            self.phi_2d.reshape(N * N, N * N) * data.reshape(N * N), axis=1
-        ).reshape(N, N)
+        return np.sum(self.phi_2d.reshape(N * N, N * N) * data.reshape(N * N), axis=1).reshape(N, N)
 
     def idct2(self, c):
         """2次元離散コサイン逆変換を行う"""
-        return np.sum(
-            (c.reshape(N, N, 1) * self.phi_2d.reshape(N, N, N * N)).reshape(
-                N * N, N * N
-            ),
-            axis=0,
-        ).reshape(N, N)
+        return np.sum((c.reshape(N, N, 1) * self.phi_2d.reshape(N, N, N * N)).reshape(N * N, N * N),axis=0,).reshape(N, N)
 
     def phi(self, k):
         """離散コサイン変換(DCT)の基底関数"""
@@ -46,9 +39,7 @@ class DCT:
         if k == 0:
             return np.ones(self.N) / np.sqrt(self.N)
         else:
-            return np.sqrt(2.0 / self.N) * np.cos(
-                (k * np.pi / (2 * self.N)) * (np.arange(self.N) * 2 + 1)
-            )
+            return np.sqrt(2.0 / self.N) * np.cos((k * np.pi / (2 * self.N)) * (np.arange(self.N) * 2 + 1))
         # DCT-IV(試しに実装してみた)
         # return np.sqrt(2.0/N)*np.cos((np.pi*(k+0.5)/self.N)*(np.arange(self.N)+0.5))
 
@@ -66,7 +57,7 @@ def df(data, alpha, beta, bS=4):
             q2 = data[j, i + 3]
             q3 = data[j, i + 4]
             # print(p3, p2, p1, p0, q0, q1, q2, q3)
-            if (abs(p2[0] - p0[0]) < beta) and (abs(p0[0] - q0[0]) < (alpha / 4)):
+            if (abs(p2[0] - p0[0]) < beta) and (abs(p0[0] - q0[0]) < np.round(alpha / 4)):
                 p0t = (p2 + 2 * p1 + 2 * p0 + 2 * q0 + q1 + 4) / 8
                 p1t = (p2 + p1 + p0 + q0 + 2) / 4
                 p2t = (2 * p3 + 3 * p2 + p1 + p0 + q0 + 4) / 8
@@ -75,7 +66,7 @@ def df(data, alpha, beta, bS=4):
                 p0t = (2 * p1 + p0 + q1 + 2) / 4
                 p1t, p2t = p1, p2
 
-            if (abs(q2[0] - q0[0]) < beta) and (abs(p0[0] - q0[0]) < (alpha / 4)):
+            if (abs(q2[0] - q0[0]) < beta) and (abs(p0[0] - q0[0]) < np.round(alpha / 4)):
                 q0t = (p1 + 2 * p0 + 2 * q0 + 2 * q1 + q2 + 4) / 8
                 q1t = (p0 + q0 + q1 + q2 + 2) / 4
                 q2t = (2 * q3 + 3 * q2 + q1 + q0 + p0 + 4) / 8
@@ -95,9 +86,7 @@ def df(data, alpha, beta, bS=4):
 
 def mse(original, converted):
     l, h, c = original.shape
-    return np.sum(
-        np.square(original.reshape(l * h * c) - converted.reshape(l * h * c))
-    ) / (l * h * c)
+    return np.sum(np.square(original.reshape(l * h * c) - converted.reshape(l * h * c))) / (l * h * c)
 
 
 if __name__ == "__main__":
@@ -112,23 +101,19 @@ if __name__ == "__main__":
     for i in range(im_c.shape[0] // N):
         for j in range(im_c.shape[1] // N):
             for k in range(im.shape[2]):
-                im_c[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.dct2(
-                    im[N * i : N * (i + 1), N * j : N * (j + 1), k]
-                )
+                im_c[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.dct2(im[N * i : N * (i + 1), N * j : N * (j + 1), k])
 
     # パラメータQによる量子化 q = {5, 10, 20, 40}
     q = 10
-    print(im_c[0, 0:5, 1])
+    print(im_c[0:5, 0:5, 1])
     im_c = np.round(im_c / q) * q
-    print(im_c[0, 0:5, 1])
+    print(im_c[0:5, 0:5, 1])
 
     # 8x8のパッチごとにdct逆変換を実行
     for i in range(im_c.shape[0] // N):
         for j in range(im_c.shape[1] // N):
             for k in range(im.shape[2]):
-                im_y[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.idct2(
-                    im_c[N * i : N * (i + 1), N * j : N * (j + 1), k]
-                )
+                im_y[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.idct2(im_c[N * i : N * (i + 1), N * j : N * (j + 1), k])
 
     # パラメータα, βによるDe-blocking Filter
     alpha = 20
