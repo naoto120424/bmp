@@ -117,7 +117,10 @@ if __name__ == "__main__":
                 )
 
     # パラメータQによる量子化 q = {5, 10, 20, 40}
-    q = 5
+    q = 10
+    print(im_c[0, 0:5, 1])
+    im_c = np.round(im_c / q) * q
+    print(im_c[0, 0:5, 1])
 
     # 8x8のパッチごとにdct逆変換を実行
     for i in range(im_c.shape[0] // N):
