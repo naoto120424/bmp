@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -27,10 +28,12 @@ class DCT:
 
     def dct2(self, data):
         """2次元離散コサイン変換を行う"""
+        N = self.N
         return np.sum(self.phi_2d.reshape(N * N, N * N) * data.reshape(N * N), axis=1).reshape(N, N)
 
     def idct2(self, c):
         """2次元離散コサイン逆変換を行う"""
+        N = self.N
         return np.sum((c.reshape(N, N, 1) * self.phi_2d.reshape(N, N, N * N)).reshape(N * N, N * N),axis=0,).reshape(N, N)
 
     def phi(self, k):
@@ -88,7 +91,7 @@ def mse(original, converted):
     return np.sum(np.square(original.reshape(l * h * c) - converted.reshape(l * h * c))) / (l * h * c)
 
 
-if __name__ == "__main__":
+def main(q=10, alpha=20, beta=20):
     N = 8
     dct = DCT(N)  # 離散コサイン変換を行うクラスを作成
 
@@ -103,7 +106,6 @@ if __name__ == "__main__":
                 im_c[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.dct2(im[N * i : N * (i + 1), N * j : N * (j + 1), k])
 
     # パラメータQによる量子化 q = {5, 10, 20, 40}
-    q = 10
     im_c = np.round(im_c / q) * q
 
     # 8x8のパッチごとにdct逆変換を実行
@@ -113,15 +115,17 @@ if __name__ == "__main__":
                 im_y[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.idct2(im_c[N * i : N * (i + 1), N * j : N * (j + 1), k])
 
     # パラメータα, βによるDe-blocking Filter
-    alpha = 20
-    beta = 20
     im_y = df(im_y, alpha=alpha, beta=beta)
 
     # 元画像と変換画像間のMSEを計算する
     im_mse = mse(im, im_y.astype(int))
-    print(f"MSE: {im_mse}")
+    print(f"Q: {q}, alpha: {alpha}, beta: {beta}, MSE: {im_mse}")
 
-    # 元の画像と復元したものを表示
+    # 元の画像と復元したものを表示、保存
+    result_path = "result"
+    os.makedirs(result_path, exist_ok=True)
+    os.makedirs(os.path.join(result_path, f"q{q}"), exist_ok=True)
+    
     fig = plt.figure(figsize=(8, 4))
     axes = fig.subplots(1, 2)
 
@@ -133,4 +137,16 @@ if __name__ == "__main__":
 
     plt.suptitle(f"q={q}, alpha={alpha}, beta={beta}, mse={im_mse:.2f}")
     plt.tight_layout()
-    plt.show()
+    plt.savefig(os.path.join(result_path, f"q{q}", f"alpha{alpha}_beta{beta}_mse{int(im_mse)}.jpg")) 
+    # plt.show()
+    plt.close()
+
+
+if __name__ == "__main__":
+    q_list = [5, 10, 20, 40]
+    alpha_list = [5, 10, 15, 20, 40]
+    beta_list = [5, 10, 15, 20, 40]
+    for q in q_list:
+        for alpha in alpha_list:
+            for beta in beta_list:
+                main(q=q, alpha=alpha, beta=beta)
