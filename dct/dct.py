@@ -6,12 +6,9 @@ import matplotlib.pyplot as plt
 
 class DCT:
     def __init__(self, N):
-        self.N = N  # データ数．
-        # 1次元，2次元離散コサイン変換の基底ベクトルをあらかじめ作っておく
+        self.N = N
         self.phi_1d = np.array([self.phi(i) for i in range(self.N)])
 
-        # Nが大きいとメモリリークを起こすので注意
-        # MNISTの28x28程度なら問題ない
         self.phi_2d = np.zeros((N, N, N, N))
         for i in range(N):
             for j in range(N):
@@ -38,13 +35,10 @@ class DCT:
 
     def phi(self, k):
         """離散コサイン変換(DCT)の基底関数"""
-        # DCT-II
         if k == 0:
             return np.ones(self.N) / np.sqrt(self.N)
         else:
             return np.sqrt(2.0 / self.N) * np.cos((k * np.pi / (2 * self.N)) * (np.arange(self.N) * 2 + 1))
-        # DCT-IV(試しに実装してみた)
-        # return np.sqrt(2.0/N)*np.cos((np.pi*(k+0.5)/self.N)*(np.arange(self.N)+0.5))
 
 
 def df(data, alpha, beta, bS=4):
@@ -125,7 +119,7 @@ def main(q=10, alpha=20, beta=20):
     result_path = "result"
     os.makedirs(result_path, exist_ok=True)
     os.makedirs(os.path.join(result_path, f"q{q}"), exist_ok=True)
-    
+
     fig = plt.figure(figsize=(8, 4))
     axes = fig.subplots(1, 2)
 
@@ -137,8 +131,7 @@ def main(q=10, alpha=20, beta=20):
 
     plt.suptitle(f"q={q}, alpha={alpha}, beta={beta}, mse={im_mse:.2f}")
     plt.tight_layout()
-    plt.savefig(os.path.join(result_path, f"q{q}", f"alpha{alpha}_beta{beta}_mse{int(im_mse)}.jpg")) 
-    # plt.show()
+    plt.savefig(os.path.join(result_path, f"q{q}", f"alpha{alpha}_beta{beta}_mse{int(im_mse)}.jpg"))
     plt.close()
 
 
