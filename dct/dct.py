@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 
 class DCT:
     def __init__(self, N):
-        self.N = N
+        self.N = N  # データ数．
+        # 1次元，2次元離散コサイン変換の基底ベクトルをあらかじめ作っておく
         self.phi_1d = np.array([self.phi(i) for i in range(self.N)])
 
+        # Nが大きいとメモリリークを起こすので注意
+        # MNISTの28x28程度なら問題ない
         self.phi_2d = np.zeros((N, N, N, N))
         for i in range(N):
             for j in range(N):
@@ -35,10 +38,13 @@ class DCT:
 
     def phi(self, k):
         """離散コサイン変換(DCT)の基底関数"""
+        # DCT-II
         if k == 0:
             return np.ones(self.N) / np.sqrt(self.N)
         else:
             return np.sqrt(2.0 / self.N) * np.cos((k * np.pi / (2 * self.N)) * (np.arange(self.N) * 2 + 1))
+        # DCT-IV(試しに実装してみた)
+        # return np.sqrt(2.0/N)*np.cos((np.pi*(k+0.5)/self.N)*(np.arange(self.N)+0.5))
 
 
 def df(data, alpha, beta, bS=4):
@@ -109,11 +115,14 @@ def main(q=10, alpha=20, beta=20):
                 im_y[N * i : N * (i + 1), N * j : N * (j + 1), k] = dct.idct2(im_c[N * i : N * (i + 1), N * j : N * (j + 1), k])
 
     # パラメータα, βによるDe-blocking Filter
-    im_y = df(im_y, alpha=alpha, beta=beta)
+    im_y_db = df(im_y, alpha=alpha, beta=beta)
 
     # 元画像と変換画像間のMSEを計算する
     im_mse = mse(im, im_y.astype(int))
-    print(f"Q: {q}, alpha: {alpha}, beta: {beta}, MSE: {im_mse}")
+    im_df_mse = mse(im, im_y_db.astype(int))
+    print(f"Q: {q}, alpha: {alpha}, beta: {beta}")
+    print(f"Quantized : {im_mse}")
+    print(f"De-Blocked: {im_df_mse}")
 
     # 元の画像と復元したものを表示、保存
     result_path = "result"
@@ -121,17 +130,19 @@ def main(q=10, alpha=20, beta=20):
     os.makedirs(os.path.join(result_path, f"q{q}"), exist_ok=True)
 
     fig = plt.figure(figsize=(8, 4))
-    axes = fig.subplots(1, 2)
+    axes = fig.subplots(1, 3)
 
     axes[0].imshow(im)
     axes[1].imshow(im_y.astype(int))
+    axes[2].imshow(im_y.astype(int))
 
     axes[0].set_title("original")
-    axes[1].set_title("restored")
+    axes[1].set_title(f"compressed\nmse={im_mse:.2f}")
+    axes[2].set_title(f"de-blocked\nmse={im_df_mse:.2f}")
 
-    plt.suptitle(f"q={q}, alpha={alpha}, beta={beta}, mse={im_mse:.2f}")
+    plt.suptitle(f"Q={q}, alpha={alpha}, beta={beta}")
     plt.tight_layout()
-    plt.savefig(os.path.join(result_path, f"q{q}", f"alpha{alpha}_beta{beta}_mse{int(im_mse)}.jpg"))
+    plt.savefig(os.path.join(result_path, f"q{q}", f"alpha{alpha}_beta{beta}.jpg"))
     plt.close()
 
 
